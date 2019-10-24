@@ -1,10 +1,16 @@
+" Disable powerline{{{
+let g:powerline_loaded=1
+set nocompatible
+"}}}
+"
 """ Optixal's Neovim Init.vim
 
 """ Vim-Plug
 call plug#begin()
 
 " Aesthetics - Main
-Plug 'dracula/vim', { 'commit': '147f389f4275cec4ef43ebc25e2011c57b45cc00' }
+"Plug 'dracula/vim', { 'commit': '147f389f4275cec4ef43ebc25e2011c57b45cc00' }
+Plug 'dracula/vim'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'ryanoasis/vim-devicons'
@@ -21,6 +27,11 @@ Plug 'nightsense/nemo'
 Plug 'yuttie/hydrangea-vim'
 Plug 'chriskempson/tomorrow-theme', { 'rtp': 'vim' }
 Plug 'rhysd/vim-color-spring-night'
+
+" mg
+"Plug 'flazz/vim-colorschemes'
+Plug 'rhysd/committia.vim'
+Plug 'terryma/vim-multiple-cursors'
 
 " Functionalities
 Plug 'tpope/vim-fugitive'
@@ -50,15 +61,34 @@ Plug 'dkarter/bullets.vim'
 
 " Entertainment
 "Plug 'ryanss/vim-hackernews'
+"
+Plug 'xolox/vim-misc'
+Plug 'xolox/vim-notes'
 
 call plug#end()
 
 """ Python3 VirtualEnv
 let g:python3_host_prog = expand('~/.config/nvim/env/bin/python')
 
+"mg: {{{
+" Promptline status 
+let git_sha_slice = {
+      \'function_name': 'git_sha',
+      \'function_body': [
+        \'function git_sha {',
+        \'  local sha',
+        \'  sha=$(git rev-parse --short HEAD 2>/dev/null) || return 1',
+        \'  printf "%s" "$sha"',
+        \'}']}
+
+" Spell oprions
+set spell
+set spelllang=de,en,ru"}}}
+"}}}
+
 """ Coloring
 syntax on
-color dracula
+color Tomorrow-Night-Eighties
 highlight Pmenu guibg=white guifg=black gui=bold
 highlight Comment gui=bold
 highlight Normal gui=none
@@ -233,4 +263,44 @@ autocmd FileType python nmap <leader>x :0,$!~/.config/nvim/env/bin/python -m yap
 nmap <silent> <leader><leader> :noh<CR>
 nmap <Tab> :bnext<CR>
 nmap <S-Tab> :bprevious<CR>
+
+"mg: Notes integration {{{
+let g:notes_directories = ["~/notes", "~/.config/nvim/plugged/vim-notes/misc/notes/user" ]
+"}}}
+
+"mg: Conceal {{{
+""" - not really works for me set conceallevel=2 concealcursor=n
+"set conceallevel=1
+"set concealcursor=ni
+"}}}
+
+"Commita - on open script {{{
+let g:committia_hooks = {}
+function! g:committia_hooks.edit_open(info)
+    " Additional settings
+    setlocal spell
+
+    " If no commit message, start with insert mode
+    if a:info.vcs ==# 'git' && getline(1) ==# ''
+        startinsert
+    endif
+
+    " Scroll the diff window from insert mode
+    " Map <C-n> and <C-p>
+    imap <buffer><C-n> <Plug>(committia-scroll-diff-down-half)
+    imap <buffer><C-p> <Plug>(committia-scroll-diff-up-half)
+    let context = {
+    	\ 'MY_ISSUE': matchstr(system('issue-util'),'\p\+'),
+        \ 'MY_BRANCH': matchstr(system('git rev-parse --abbrev-ref HEAD'), '\p\+'),
+        \ 'AUTHOR': 'Mikhail Galyutin',
+        \ }
+
+    let lnum = nextnonblank(1)
+    while lnum && lnum < line('$')
+	    call setline(lnum, substitute(getline(lnum), '\${\(\w\+\)}',
+		  \ '\=get(context, submatch(1), submatch(0))', 'g'))
+	    let lnum = nextnonblank(lnum + 1)
+    endwhile
+endfunction
+"}}}
 

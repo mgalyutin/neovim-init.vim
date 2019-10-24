@@ -1,22 +1,24 @@
 #!/bin/bash -e
 
+INSTALL_TARAGET=~/.config/nvim
+PKG_INSTALL_COMMAND=yay -S 
+
 # Make config directory for Neovim's init.vim
 echo '[*] Preparing Neovim config directory ...'
-mkdir -p ~/.config/nvim
+mkdir -p $INSTALL_TARAGET
 
 # Install nvim (and its dependencies: pip3, git), Python 3 and ctags (for tagbar)
 echo '[*] App installing Neovim and its dependencies (Python 3 and git), and dependencies for tagbar (exuberant-ctags) ...'
-sudo apt update
-sudo apt install neovim python3 python3-pip git curl exuberant-ctags -y
+$PKG_INSTALL_COMMAND neovim python3 python3-pip git curl python-neovim-git python2-neovim-git
 
 # Install virtualenv to containerize dependencies
 echo '[*] Pip installing virtualenv to containerize Neovim dependencies (instead of installing them onto your system) ...'
 python3 -m pip install virtualenv
-python3 -m virtualenv -p python3 ~/.config/nvim/env
+python3 -m virtualenv -p python3 $INSTALL_TARAGET/env
 
 # Install pip modules for Neovim within the virtual environment created
 echo '[*] Activating virtualenv and pip installing Neovim (for Python plugin support), libraries for async autocompletion support (jedi, psutil, setproctitle), and library for pep8-style formatting (yapf) ...'
-source ~/.config/nvim/env/bin/activate
+source $INSTALL_TARAGET/env/bin/activate
 pip install neovim==0.2.6 jedi psutil setproctitle yapf
 deactivate
 
@@ -29,18 +31,18 @@ echo "[*] Downloading patch font into ~/.local/share/fonts ..."
 curl -fLo ~/.fonts/Iosevka\ Term\ Nerd\ Font\ Complete.ttf --create-dirs https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/Iosevka/Regular/complete/Iosevka%20Term%20Nerd%20Font%20Complete.ttf
 
 # (Optional) Alias vim -> nvim
-echo '[*] Aliasing vim -> nvim, remember to source ~/.bashrc ...'
-echo "alias vim='nvim'" >> ~/.bashrc
+echo '[*] Aliasing vim -> nvim, remember to source ~/.zshrc...'
+echo "alias vim='nvim'" >> ~/.zshrc
 
 # Enter Neovim and install plugins using a temporary init.vim, which avoids warnings about missing colorschemes, functions, etc
 echo -e '[*] Running :PlugInstall within nvim ...'
-sed '/call plug#end/q' init.vim > ~/.config/nvim/init.vim
+sed '/call plug#end/q' init.vim > $INSTALL_TARAGET/init.vim
 nvim -c ':PlugInstall' -c ':UpdateRemotePlugins' -c ':qall'
-rm ~/.config/nvim/init.vim
+#rm ~/.config/nvim/init.vim
 
 # Copy init.vim in current working directory to nvim's config location ...
-echo '[*] Copying init.vim -> ~/.config/nvim/init.vim'
-cp init.vim ~/.config/nvim/
+echo '[*] Copying init.vim -> $INSTALL_TARAGET/init.vim'
+cp init.vim $INSTALL_TARAGET
 
-echo -e "[+] Done, welcome to \033[1m\033[92mNeoVim\033[0m! Try it by running: nvim/vim. Want to customize it? Modify ~/.config/nvim/init.vim"
+echo -e "[+] Done, welcome to \033[1m\033[92mNeoVim\033[0m! Try it by running: nvim/vim. Want to customize it? Modify $INSTALL_TARAGET/init.vim"
 
