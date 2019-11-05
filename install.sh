@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 INSTALL_TARAGET=~/.config/nvim
-PKG_INSTALL_COMMAND=yay -S 
+PKG_INSTALL_COMMAND="yay -S" 
 
 # Make config directory for Neovim's init.vim
 echo '[*] Preparing Neovim config directory ...'
@@ -9,11 +9,11 @@ mkdir -p $INSTALL_TARAGET
 
 # Install nvim (and its dependencies: pip3, git), Python 3 and ctags (for tagbar)
 echo '[*] App installing Neovim and its dependencies (Python 3 and git), and dependencies for tagbar (exuberant-ctags) ...'
-$PKG_INSTALL_COMMAND neovim python3 python3-pip git curl python-neovim-git python2-neovim-git
+$PKG_INSTALL_COMMAND neovim python python-pip git curl python-neovim-git 
 
 # Install virtualenv to containerize dependencies
 echo '[*] Pip installing virtualenv to containerize Neovim dependencies (instead of installing them onto your system) ...'
-python3 -m pip install virtualenv
+python3 -m pip install --user virtualenv
 python3 -m virtualenv -p python3 $INSTALL_TARAGET/env
 
 # Install pip modules for Neovim within the virtual environment created
